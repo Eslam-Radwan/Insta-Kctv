@@ -5,28 +5,21 @@ import os
 import json
 import argparse
 import regex as re
-from azure.ai.formrecognizer import DocumentAnalysisClient
-from azure.core.credentials import AzureKeyCredential
+import fitz
 import logging
 logger = logging.getLogger(__name__)
 
 
-endpoint = os.environ.get("KRLFORMRECOGNIZER_ENDPOINT")
-key = os.environ.get("KRLFORMRECOGNIZER_KEY")
-
-
 def analyze_layout(doc_path):
-    document_analysis_client = DocumentAnalysisClient(
-        endpoint=endpoint, credential=AzureKeyCredential(key)
-    )
-    doc_analysis_model = "prebuilt-document"
-    logger.info(f'Processing doc {doc_path} with {doc_analysis_model}')
-    with open(doc_path, 'rb') as fin:
-        poller = document_analysis_client.begin_analyze_document(
-                doc_analysis_model, fin)
-    result = poller.result()
+    logger.info(f'Processing doc {doc_path} with PyMuPDF')
+    doc = fitz.open(doc_path)
+    full_text = ""
+    for page in doc:
+        full_text += page.get_text()
+    doc.close()
+    result = {"content": full_text}
     with open(f'{doc_path}.json', 'w', encoding='utf-8') as fout:
-        data = json.dumps(result.to_dict(), indent=4, ensure_ascii=False)
+        data = json.dumps(result, indent=4, ensure_ascii=False)
         fout.write(data)
     return f'{doc_path}.json'
 
@@ -50,12 +43,11 @@ def get_figures(figure_json_path):
                     f'Figure Caption: {fig["caption"]}'
         descriptions.append(prompt_text)
         figs[f'{fig["figType"]} {fig["name"]}'] = {
-            "promptText": fig_desc,
+            "promptText": prompt_text,
             "renderURL": fig['renderURL'],
             "caption": fig["caption"],
-            # "description": "" # TODO
-
         }
+    return figs
         
 def prepare_latex_for_eval(input_latex):
     # Get title 
@@ -109,7 +101,12 @@ def parse_gpt_response(response):
             text += parse_gpt_response(response[key])
         elif type(response[key]) == list:
             for sent in response[key]:
-                text += sent + ' '
+                if type(sent) == dict:
+                    name = sent.get("Name", sent.get("name", ""))
+                    caption = sent.get("Caption", sent.get("caption", ""))
+                    text += f"({name}: {caption}) "
+                else:
+                    text += str(sent) + ' '
             text += '\n\n'
         else:
             text += f'{response[key]}\n\n'
