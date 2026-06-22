@@ -112,12 +112,6 @@ def main(args):
     output_doc_name = args.input_doc.split('/')[-1].split('.')[0]
     os.makedirs(args.output_dir, exist_ok=True)
 
-    if args.figures_dir is None:
-        auto_figures_dir = os.path.join(os.path.dirname(os.path.abspath(args.input_doc)), 'figures')
-        if os.path.isdir(auto_figures_dir):
-            logger.info(f"Automatically detected figures directory: {auto_figures_dir}")
-            args.figures_dir = auto_figures_dir
-
     time_wait = 60 / args.max_req_per_min
 
     if args.skip_internal_rep:
