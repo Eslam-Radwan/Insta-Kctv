@@ -5,6 +5,7 @@ Contains style parameters for each template
 slides = '''
 Slides should include a title page. Following slides should contain an informative slide title
 and short, concise bullet points. Longer slides should be broken up into multiple slides.
+Use the Metropolis Beamer theme.
 '''   
 
 posters = '''

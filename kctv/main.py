@@ -163,6 +163,8 @@ def main(args):
             latex_prompt = [{'role': 'user', 'content': prompts.convert_to_latex.format('slide', style.slides, gpt_response)}]
         gpt_latex = gpt.get_response(args.model_name, latex_prompt, temperature=args.temperature, time_wait=time_wait)['choices'][0]['message']['content']
         gpt_latex = strip_code_fence(gpt_latex)
+        if '\\usetheme' not in gpt_latex:
+            gpt_latex = gpt_latex.replace('\\begin{document}', '\\usetheme{metropolis}\n\\begin{document}')
         if args.figures_dir:
             gpt_latex = replace_mentions_of_figures(gpt_latex, args.figures_dir, args.output_dir, template_type='slide')
         with open(os.path.join(args.output_dir, f'{output_doc_name}_slides.tex'), 'w', encoding='utf-8') as fout:

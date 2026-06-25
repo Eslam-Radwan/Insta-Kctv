@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def compile_tex(tex_path, engine="pdflatex", passes=3):
+def compile_tex(tex_path, engine="xelatex", passes=3):
     if not os.path.exists(tex_path):
         logger.error(f"File not found: {tex_path}")
         return False
@@ -66,7 +66,7 @@ def _extract_errors(log_output):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compile a .tex file to PDF")
     parser.add_argument("tex_file", help="Path to the .tex file to compile")
-    parser.add_argument("--engine", default="pdflatex",
+    parser.add_argument("--engine", default="xelatex",
                         choices=["pdflatex", "xelatex", "lualatex"],
                         help="LaTeX engine to use (default: pdflatex)")
     parser.add_argument("--passes", type=int, default=3,
