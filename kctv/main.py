@@ -41,7 +41,7 @@ def replace_mentions_of_figures(latex, figure_dir, output_dir=None, template_typ
     inserted = len(replaced_figures) > 0
     
     for i, paragraph in enumerate(paragraphs):
-        figures = re.findall("(Figure|Table) (\d+)", paragraph)
+        figures = re.findall(r"(Figure|Table) (\d+)", paragraph)
         for fig_type, fig_num in figures:
             if (fig_type.lower(), int(fig_num)) in replaced_figures:
                 continue
